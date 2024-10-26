@@ -1,6 +1,7 @@
 {
     "name": "dev",
     "dockerFile": "Dockerfile",
+    "remoteUser": "dev",
     "postCreateCommand": "/usr/bin/fish ./.devcontainer/postCreateCommands.fish",
     "customizations": {
         "vscode": {
