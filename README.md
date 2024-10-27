@@ -3,22 +3,28 @@
 [![PyPI version](https://badge.fury.io/py/sscsv.svg)](https://badge.fury.io/py/sscsv)
 [![Python Versions](https://img.shields.io/pypi/pyversions/sscsv.svg)](https://pypi.org/project/sscsv/)
 
-A tool designed for rapid CSV file processing and filtering, specifically designed for log analysis.
-
-## Description
-
+A tool provides elastic and rapid filtering for efficient analysis of huge CSV files like eventlogs.
 
 > [!NOTE]  
 > This project is in the early stages of development. Please be aware that frequent changes and updates are likely to occur.
 
+## Description
+### Archtecture
+This tool processes csv(comma-separated values) file by connecting three processes: initializer, chainable functions, and finalizer.  
+For example, you can load a csv file in the initializer, use a chainable functions to filter, sort, and select columns, and then output the resulting csv file in the finalizer.
+
+![](https://gist.githubusercontent.com/sumeshi/644af27c8960a9b6be6c7470fe4dca59/raw/5c989633b486f26705e6cb9d7a20e3af104d1896/sscsv2.svg)
+
+```bash
+$ sscsv {{INITIALIZER}} {{Arguments}} - {{CHAINABLE}} {{Arguments}} - {{FINALIZER}} {{Arguments}}
+```
+Each process must be explicitly separated by a “-”.
+
 
 ## Usage
-```bash
-$ sscsv {{initializer}} {{Arguments}} - {{chainable}} {{Arguments}} - {{chainable}} {{Arguments}} - {{finalizer}} {{Arguments}}
-```
-
 e.g.
 Below is an example of reading a CSV file, extracting rows that contain 4624 in the EventID column, and displaying the top 3 rows them sorted by the Timestamp column.
+
 ```bash
 $ sscsv load Security.csv - isin 'Event ID' 4624 - sort 'Date and Time' - head 3
 2024-06-26T17:29:19+0000 [DEBUG] 1 files are loaded. Security.csv
@@ -38,36 +44,26 @@ shape: (3, 5)
 ```
 
 
-## Archtecture
-This tool processes csv by connecting three processes: initializer, chainable, and finalizer.  
-For example, the initializer reads in the file, goes through multiple chainable processing steps, and then outputs the file using the finalizer.  
-
-Also, each process is explicitly separated from the others by "-".
-
-![](https://gist.githubusercontent.com/sumeshi/644af27c8960a9b6be6c7470fe4dca59/raw/74764568e282ad173a9a51659c65c9f0a029ae38/sscsv.svg)
-
-### initializer
+### Initializers
 #### load
 Loads the specified CSV files.
-
 ```
 Arguments:
   path*: str
 ```
 
 examples
-
 ```
-$ sscsv load ./Security.evtx
-```
-
-```
-$ sscsv load ./logs/*.evtx
+$ sscsv load ./Security.csv
 ```
 
-### chainable manipulation
+```
+$ sscsv load ./logs/*.csv
+```
+
+### Chainable Functions
 #### select
-Displays the specified columns.
+Filter only on the specified columns.
 
 ```
 Arguments:
@@ -75,22 +71,20 @@ Arguments:
 ```
 
 examples
-
 ```
-$ sscsv load ./Security.evtx - select 'Event ID'
-```
-
-```
-$ sscsv load ./Security.evtx - select "Date and Time-Event ID"
+$ sscsv load ./Security.csv - select 'Event ID'
 ```
 
 ```
-$ sscsv load ./Security.evtx - select "'Date and Time,Event ID'"
+$ sscsv load ./Security.csv - select "Date and Time-Event ID"
+```
+
+```
+$ sscsv load ./Security.csv - select "'Date and Time,Event ID'"
 ```
 
 #### isin
-
-Displays rows that contain the specified values.
+Filter rows containing the specified values.
 
 ```
 Arguments:
@@ -99,14 +93,12 @@ Arguments:
 ```
 
 examples
-
 ```
-$ sscsv load ./Security.evtx - isin 'Event ID' 4624,4634
+$ sscsv load ./Security.csv - isin 'Event ID' 4624,4634
 ```
 
 #### contains
-
-Displays rows that contain the specified string.
+Filter rows containing the specified regex.
 
 ```
 Arguments:
@@ -115,14 +107,12 @@ Arguments:
 ```
 
 examples
-
 ```
-$ sscsv load ./Security.evtx - contains 'Date and Time' '10/6/2016'
+$ sscsv load ./Security.csv - contains 'Date and Time' '10/6/2016'
 ```
 
 #### head
-
-Displays the first specified number of rows of the data.
+Filters only the specified number of lines from the first line.
 
 ```
 Options:
@@ -132,12 +122,11 @@ Options:
 examples
 
 ```
-$ sscsv load ./Security.evtx - head 10
+$ sscsv load ./Security.csv - head 10
 ```
 
 #### tail
-
-Displays the last specified number of rows of the data.
+Filters only the specified number of lines from the last line.
 
 ```
 Options:
@@ -147,12 +136,11 @@ Options:
 examples
 
 ```
-$ sscsv load ./Security.evtx - tail 10
+$ sscsv load ./Security.csv - tail 10
 ```
 
 #### sort
-
-Sorts the data by the values of the specified column.
+Sorts all rows by the specified column value.
 
 ```
 Arguments:
@@ -165,11 +153,10 @@ Options:
 examples
 
 ```
-$ sscsv load ./Security.evtx - sort 'Date and Time'
+$ sscsv load ./Security.csv - sort 'Date and Time'
 ```
 
 #### changetz
-
 Changes the timezone of the specified date column.
 
 ```
@@ -185,12 +172,11 @@ Options:
 examples
 
 ```
-$ sscsv load ./Security.evtx - changetz 'Date and Time' --timezone_from=UTC --timezone_to=Asia/Tokyo --new_colname='Date and Time(JST)'
+$ sscsv load ./Security.csv - changetz 'Date and Time' --timezone_from=UTC --timezone_to=Asia/Tokyo --new_colname='Date and Time(JST)'
 ```
 
-### finalizer
+### Finalizer
 #### headers
-
 Displays the column names of the data.
 
 ```
@@ -201,7 +187,7 @@ Options:
 examples
 
 ```
-$ sscsv load ./Security.evtx - headers
+$ sscsv load ./Security.csv - headers
 2024-06-30T13:17:53+0000 [DEBUG] 1 files are loaded. Security.csv
 ┏━━━━┳━━━━━━━━━━━━━━━┓
 ┃ #  ┃ Column Name   ┃
@@ -215,13 +201,12 @@ $ sscsv load ./Security.evtx - headers
 ```
 
 #### stats
-
 Displays the statistical information of the data.
 
 examples
 
 ```
-$ sscsv load ./Security.evtx - stats
+$ sscsv load ./Security.csv - stats
 2024-06-30T13:25:53+0000 [DEBUG] 1 files are loaded. Security.csv
 shape: (9, 6)
 ┌────────────┬─────────────┬───────────────────────┬─────────────────────────────────┬─────────────┬─────────────────────────┐
@@ -245,7 +230,6 @@ shape: (9, 6)
 Displays the data processing query.
 
 examples
-
 ```
 sscsv load Security.csv - showquery
 2024-06-30T13:26:54+0000 [DEBUG] 1 files are loaded. Security.csv
@@ -259,7 +243,6 @@ naive plan: (run LazyFrame.explain(optimized=True) to see the optimized plan)
 Outputs the processing results to the standard output.
 
 examples
-
 ```
 $ sscsv load Security.csv - show
 2024-06-30T13:27:34+0000 [DEBUG] 1 files are loaded. Security.csv
@@ -281,13 +264,12 @@ Options:
 ```
 
 examples
-
 ```
 $ sscsv load Security.csv - dump ./Security-sscsv.csv
 ```
 
 ## Planned Features:
-- CSV cache (.pkl)
+- CSV cache (.pkl, duckdb, etc.)
 - Filtering based on specific conditions (OR, AND conditions)
 - Grouping for operations like count
 - Joining with other tables
