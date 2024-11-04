@@ -13,7 +13,7 @@ A tool provides elastic and rapid filtering for efficient analysis of huge CSV f
 This tool processes csv(comma-separated values) file by connecting three processes: initializer, chainable functions, and finalizer.  
 For example, you can load a csv file in the initializer, use a chainable functions to filter, sort, and select columns, and then output the resulting csv file in the finalizer.
 
-![](https://gist.githubusercontent.com/sumeshi/644af27c8960a9b6be6c7470fe4dca59/raw/5c989633b486f26705e6cb9d7a20e3af104d1896/qsv2.svg)
+![](https://gist.github.com/sumeshi/644af27c8960a9b6be6c7470fe4dca59/raw/2a19fafd4f4075723c731e4a8c8d21c174cf0ffb/qsv.svg)
 
 ```bash
 $ qsv {{INITIALIZER}} {{Arguments}} - {{CHAINABLE}} {{Arguments}} - {{FINALIZER}} {{Arguments}}
