@@ -97,6 +97,20 @@ class DataFrameController(object):
         regex = regex if type(regex) is str else str(regex)
         self.df = self.df.with_columns(pl.col(colname).cast(pl.String).str.replace(regex, replaced_text))
         return self
+    
+    def grep(self, regex: str):
+        """[chainable] Treats all cols as strings and filters only matched cols by searching with the specified regex"""
+        self.df = self.df.with_columns(
+            pl.concat_str(
+                [pl.col(colname).cast(pl.String).fill_null("") for colname in self.df.collect_schema().names()],
+                separator=","
+            ).alias('___combined')
+        )
+        self.df = self.df.filter(
+            pl.col('___combined').str.contains(regex)
+        )
+        self.df = self.df.drop(['___combined'])
+        return self
 
     def head(self, number: int = 5):
         """[chainable] Filters only the specified number of lines from the first line."""
@@ -157,11 +171,11 @@ class DataFrameController(object):
     def headers(self, plain: bool = False):
         """[finalizer] Displays the column names of the data."""
         if plain:
-            print(",".join([f"\"{c}\"" for c in self.df.columns]))
+            print(",".join([f"\"{c}\"" for c in self.df.collect_schema().names()]))
         else:
             TableView.print(
                 headers=["#", "Column Name"],
-                values=[[str(i).zfill(2), c] for i, c in enumerate(self.df.columns)]
+                values=[[str(i).zfill(2), c] for i, c in enumerate(self.df.collect_schema().names())]
             )
     
     def stats(self):
