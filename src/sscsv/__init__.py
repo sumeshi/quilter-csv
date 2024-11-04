@@ -11,6 +11,7 @@ logging.basicConfig(
     ]
 )
 
+# entrypoint
 def main():
     fire.Fire(DataFrameController)
 
