@@ -136,7 +136,7 @@ $ qsv load ./Security.csv - tail 10
 ```
 
 #### sort
-Sorts all rows by the specified column value.
+Sorts all rows by the specified column values.
 
 ```
 Arguments:
@@ -246,6 +246,24 @@ Information,10/7/2016 06:38:24 PM,Microsoft-Windows-Security-Auditing,4656,File 
 Information,10/7/2016 06:38:24 PM,Microsoft-Windows-Security-Auditing,4658,File System
 ```
 
+#### showtable
+Outputs the processing results table to the standard output.
+
+examples
+```
+$ qsv load Security.csv - showtable
+shape: (3, 5)
+┌─────────────┬───────────────────────┬─────────────────────────────────┬──────────┬───────────────┐
+│ Level       ┆ Date and Time         ┆ Source                          ┆ Event ID ┆ Task Category │
+│ ---         ┆ ---                   ┆ ---                             ┆ ---      ┆ ---           │
+│ str         ┆ str                   ┆ str                             ┆ i64      ┆ str           │
+╞═════════════╪═══════════════════════╪═════════════════════════════════╪══════════╪═══════════════╡
+│ Information ┆ 10/6/2016 01:00:55 PM ┆ Microsoft-Windows-Security-Aud… ┆ 4624     ┆ Logon         │
+│ Information ┆ 10/6/2016 01:04:05 PM ┆ Microsoft-Windows-Security-Aud… ┆ 4624     ┆ Logon         │
+│ Information ┆ 10/6/2016 01:04:10 PM ┆ Microsoft-Windows-Security-Aud… ┆ 4624     ┆ Logon         │
+└─────────────┴───────────────────────┴─────────────────────────────────┴──────────┴───────────────┘
+```
+
 #### dump
 Outputs the processing results to a CSV file.
 
@@ -259,13 +277,46 @@ examples
 $ qsv load Security.csv - dump ./Security-qsv.csv
 ```
 
+
+### Quilt
+Quilt is a command that pre-defines a series of the above Initializer - Chainable Functions - Finalizer processes in a yaml rule and executes them all at once.
+
+e.g
+```
+$ qsv quilt rules ./Security.csv
+```
+
+rules/test.yaml
+```yaml
+title: test
+description: test filter
+version: 0.1.0
+author: John Doe <john@example.com>
+rules:
+  load: 
+  isin:
+    colname: EventId
+    values:
+      - 4624
+  head:
+    number: 5
+  select:
+    columns:
+      - RecordNumber
+      - TimeCreated
+  changetz:
+    colname: TimeCreated
+    timezone_from: UTC
+    timezone_to: Asia/Tokyo
+    datetime_format: "%Y-%m-%d %H:%M:%S%.f"
+  showtable:
+```
+
 ## Planned Features:
 - CSV cache (.pkl, duckdb, etc.)
 - Filtering based on specific conditions (OR, AND conditions)
 - Grouping for operations like count
 - Joining with other tables
-- Config Batch
-- Export Config
 
 ## Installation
 ### from PyPI
@@ -288,4 +339,4 @@ $ ./qsv {{options...}}
 ```
 
 ## License
-snip-snap-csv is released under the [MIT](https://github.com/sumeshi/quilter-csv/blob/master/LICENSE) License.
+Quilter-csv is released under the [MIT](https://github.com/sumeshi/quilter-csv/blob/master/LICENSE) License.

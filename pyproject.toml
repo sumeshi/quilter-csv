@@ -1,6 +1,6 @@
 [project]
 name = "qsv"
-version = "0.2.0"
+version = "0.3.0"
 description = "A tool designed for rapid CSV file processing and filtering, specifically designed for log analysis."
 readme = "README.md"
 authors = [
