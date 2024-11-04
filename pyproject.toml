@@ -1,6 +1,6 @@
 [project]
-name = "sscsv"
-version = "0.1.1"
+name = "qsv"
+version = "0.2.0"
 description = "A tool designed for rapid CSV file processing and filtering, specifically designed for log analysis."
 readme = "README.md"
 authors = [
@@ -23,4 +23,4 @@ dev = [
 ]
 
 [project.scripts]
-sscsv = "sscsv:main"
+qsv = "qsv:main"

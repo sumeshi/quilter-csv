@@ -4,8 +4,8 @@ import logging
 from datetime import datetime
 from typing import Union
 
-from sscsv.controllers.CsvController import CsvController
-from sscsv.views.TableView import TableView
+from qsv.controllers.CsvController import CsvController
+from qsv.views.TableView import TableView
 
 import polars as pl
 

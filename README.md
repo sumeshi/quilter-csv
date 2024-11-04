@@ -1,7 +1,7 @@
-# snip-snap-csv
+# Quilter-CSV
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
-[![PyPI version](https://badge.fury.io/py/sscsv.svg)](https://badge.fury.io/py/sscsv)
-[![Python Versions](https://img.shields.io/pypi/pyversions/sscsv.svg)](https://pypi.org/project/sscsv/)
+[![PyPI version](https://badge.fury.io/py/qsv.svg)](https://badge.fury.io/py/qsv)
+[![Python Versions](https://img.shields.io/pypi/pyversions/qsv.svg)](https://pypi.org/project/qsv/)
 
 A tool provides elastic and rapid filtering for efficient analysis of huge CSV files like eventlogs.
 
@@ -13,10 +13,10 @@ A tool provides elastic and rapid filtering for efficient analysis of huge CSV f
 This tool processes csv(comma-separated values) file by connecting three processes: initializer, chainable functions, and finalizer.  
 For example, you can load a csv file in the initializer, use a chainable functions to filter, sort, and select columns, and then output the resulting csv file in the finalizer.
 
-![](https://gist.githubusercontent.com/sumeshi/644af27c8960a9b6be6c7470fe4dca59/raw/5c989633b486f26705e6cb9d7a20e3af104d1896/sscsv2.svg)
+![](https://gist.githubusercontent.com/sumeshi/644af27c8960a9b6be6c7470fe4dca59/raw/5c989633b486f26705e6cb9d7a20e3af104d1896/qsv2.svg)
 
 ```bash
-$ sscsv {{INITIALIZER}} {{Arguments}} - {{CHAINABLE}} {{Arguments}} - {{FINALIZER}} {{Arguments}}
+$ qsv {{INITIALIZER}} {{Arguments}} - {{CHAINABLE}} {{Arguments}} - {{FINALIZER}} {{Arguments}}
 ```
 Each process must be explicitly separated by a “-”.
 
@@ -26,11 +26,7 @@ e.g.
 Below is an example of reading a CSV file, extracting rows that contain 4624 in the EventID column, and displaying the top 3 rows them sorted by the Timestamp column.
 
 ```bash
-$ sscsv load Security.csv - isin 'Event ID' 4624 - sort 'Date and Time' - head 3
-2024-06-26T17:29:19+0000 [DEBUG] 1 files are loaded. Security.csv
-2024-06-26T17:29:19+0000 [DEBUG] filter condition: 4624 in Event ID
-2024-06-26T17:29:19+0000 [DEBUG] sort by Date and Time (asc).
-2024-06-26T17:29:19+0000 [DEBUG] heading 3 lines.
+$ qsv load Security.csv - isin 'Event ID' 4624 - sort 'Date and Time' - head 3
 shape: (3, 5)
 ┌─────────────┬───────────────────────┬─────────────────────────────────┬──────────┬───────────────┐
 │ Level       ┆ Date and Time         ┆ Source                          ┆ Event ID ┆ Task Category │
@@ -54,11 +50,11 @@ Arguments:
 
 examples
 ```
-$ sscsv load ./Security.csv
+$ qsv load ./Security.csv
 ```
 
 ```
-$ sscsv load ./logs/*.csv
+$ qsv load ./logs/*.csv
 ```
 
 ### Chainable Functions
@@ -72,15 +68,15 @@ Arguments:
 
 examples
 ```
-$ sscsv load ./Security.csv - select 'Event ID'
+$ qsv load ./Security.csv - select 'Event ID'
 ```
 
 ```
-$ sscsv load ./Security.csv - select "Date and Time-Event ID"
+$ qsv load ./Security.csv - select "Date and Time-Event ID"
 ```
 
 ```
-$ sscsv load ./Security.csv - select "'Date and Time,Event ID'"
+$ qsv load ./Security.csv - select "'Date and Time,Event ID'"
 ```
 
 #### isin
@@ -94,7 +90,7 @@ Arguments:
 
 examples
 ```
-$ sscsv load ./Security.csv - isin 'Event ID' 4624,4634
+$ qsv load ./Security.csv - isin 'Event ID' 4624,4634
 ```
 
 #### contains
@@ -108,7 +104,7 @@ Arguments:
 
 examples
 ```
-$ sscsv load ./Security.csv - contains 'Date and Time' '10/6/2016'
+$ qsv load ./Security.csv - contains 'Date and Time' '10/6/2016'
 ```
 
 #### head
@@ -122,7 +118,7 @@ Options:
 examples
 
 ```
-$ sscsv load ./Security.csv - head 10
+$ qsv load ./Security.csv - head 10
 ```
 
 #### tail
@@ -136,7 +132,7 @@ Options:
 examples
 
 ```
-$ sscsv load ./Security.csv - tail 10
+$ qsv load ./Security.csv - tail 10
 ```
 
 #### sort
@@ -153,7 +149,7 @@ Options:
 examples
 
 ```
-$ sscsv load ./Security.csv - sort 'Date and Time'
+$ qsv load ./Security.csv - sort 'Date and Time'
 ```
 
 #### changetz
@@ -172,7 +168,7 @@ Options:
 examples
 
 ```
-$ sscsv load ./Security.csv - changetz 'Date and Time' --timezone_from=UTC --timezone_to=Asia/Tokyo --new_colname='Date and Time(JST)'
+$ qsv load ./Security.csv - changetz 'Date and Time' --timezone_from=UTC --timezone_to=Asia/Tokyo --new_colname='Date and Time(JST)'
 ```
 
 ### Finalizer
@@ -187,8 +183,7 @@ Options:
 examples
 
 ```
-$ sscsv load ./Security.csv - headers
-2024-06-30T13:17:53+0000 [DEBUG] 1 files are loaded. Security.csv
+$ qsv load ./Security.csv - headers
 ┏━━━━┳━━━━━━━━━━━━━━━┓
 ┃ #  ┃ Column Name   ┃
 ┡━━━━╇━━━━━━━━━━━━━━━┩
@@ -206,8 +201,7 @@ Displays the statistical information of the data.
 examples
 
 ```
-$ sscsv load ./Security.csv - stats
-2024-06-30T13:25:53+0000 [DEBUG] 1 files are loaded. Security.csv
+$ qsv load ./Security.csv - stats
 shape: (9, 6)
 ┌────────────┬─────────────┬───────────────────────┬─────────────────────────────────┬─────────────┬─────────────────────────┐
 │ statistic  ┆ Level       ┆ Date and Time         ┆ Source                          ┆ Event ID    ┆ Task Category           │
@@ -231,8 +225,7 @@ Displays the data processing query.
 
 examples
 ```
-sscsv load Security.csv - showquery
-2024-06-30T13:26:54+0000 [DEBUG] 1 files are loaded. Security.csv
+qsv load Security.csv - showquery
 naive plan: (run LazyFrame.explain(optimized=True) to see the optimized plan)
 
   Csv SCAN Security.csv
@@ -244,9 +237,7 @@ Outputs the processing results to the standard output.
 
 examples
 ```
-$ sscsv load Security.csv - show
-2024-06-30T13:27:34+0000 [DEBUG] 1 files are loaded. Security.csv
-2024-06-30T13:27:34+0000 [DEBUG] heading 5 lines.
+$ qsv load Security.csv - show
 Level,Date and Time,Source,Event ID,Task Category
 Information,10/7/2016 06:38:24 PM,Microsoft-Windows-Security-Auditing,4658,File System
 Information,10/7/2016 06:38:24 PM,Microsoft-Windows-Security-Auditing,4656,File System
@@ -265,7 +256,7 @@ Options:
 
 examples
 ```
-$ sscsv load Security.csv - dump ./Security-sscsv.csv
+$ qsv load Security.csv - dump ./Security-qsv.csv
 ```
 
 ## Planned Features:
@@ -279,7 +270,7 @@ $ sscsv load Security.csv - dump ./Security-sscsv.csv
 ## Installation
 ### from PyPI
 ```
-$ pip install sscsv
+$ pip install qsv
 ```
 
 ### from GitHub Releases
@@ -287,14 +278,14 @@ The version compiled into a binary using Nuitka is also available for use.
 
 #### Ubuntu
 ```
-$ chmod +x ./sscsv
-$ ./sscsv {{options...}}
+$ chmod +x ./qsv
+$ ./qsv {{options...}}
 ```
 
 #### Windows
 ```
-> sscsv.exe {{options...}}
+> qsv.exe {{options...}}
 ```
 
 ## License
-snip-snap-csv is released under the [MIT](https://github.com/sumeshi/snip-snap-csv/blob/master/LICENSE) License.
+snip-snap-csv is released under the [MIT](https://github.com/sumeshi/quilter-csv/blob/master/LICENSE) License.
