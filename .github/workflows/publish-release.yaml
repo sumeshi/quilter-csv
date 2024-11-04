@@ -28,7 +28,7 @@ jobs:
 
       - name: build
         run: |
-          pip install nuitka
+          uv add --dev nuitka
           uv run python -m nuitka --standalone --onefile --follow-imports -o qsv.exe --output-dir=dist --assume-yes-for-downloads src/qsv/__init__.py
       
       - name: verify
@@ -79,7 +79,7 @@ jobs:
 
       - name: build
         run: |
-          pip install nuitka
+          uv add --dev nuitka
           uv run python -m nuitka --standalone --onefile --follow-imports -o qsv --output-dir=dist --assume-yes-for-downloads src/qsv/__init__.py
       
       - name: verify
