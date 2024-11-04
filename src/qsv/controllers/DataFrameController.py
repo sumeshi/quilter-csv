@@ -5,27 +5,42 @@ from datetime import datetime
 from typing import Union
 
 from qsv.controllers.CsvController import CsvController
+from qsv.controllers.QuiltController import QuiltController
 from qsv.views.TableView import TableView
 
 import polars as pl
 
 
 logger = logging.getLogger(__name__)
+logger.disabled = True
 
 
 class DataFrameController(object):
-    def __init__(self, logging=False):
-    def __init__(self, logging=True):
+    def __init__(self):
         self.df = None
 
-        if logging:
-            logger.disabled = True
-            logger.disabled = False
-    
+    # -- quilter --
+    def quilt(self, config: str, *path: str):
+        """[quilter] Loads the specified quilt batch files."""
+        logger.debug(f"config: {config}")
+        logger.debug(f"{len(path)} files are loaded. [{', '.join(path)}]")
+        q = QuiltController()
+        configs = q.load_configs(config)
+        q.print_configs(configs)
+
+        for c in configs:
+            for k, v in c.get('rules').items():
+                if k == 'load':
+                    self.load(*path)
+                elif v:
+                    getattr(self, k)(**v)
+                else:
+                    getattr(self, k)()
+        
     # -- initializer --
     def load(self, *path: str):
         """[initializer] Loads the specified CSV files."""
-        logger.debug(f"{len(path)} files are loaded. {', '.join(path)}")
+        logger.debug(f"{len(path)} files are loaded. [{', '.join(path)}]")
         self.df = CsvController(path=path).get_dataframe()
         return self
 
@@ -53,7 +68,11 @@ class DataFrameController(object):
                     parsed_columns.append(col)
             return parsed_columns
         
-        selected_columns = parse_columns(headers=self.df.columns, columns=columns)
+        # for quilter
+        columns = tuple(columns) if type(columns) is list else columns
+
+        selected_columns = parse_columns(headers=self.df.collect_schema().names(), columns=columns)
+        # selected_columns = parse_columns(headers=self.df.columns, columns=columns)
         logger.debug(f"{len(selected_columns)} columns are selected. {', '.join(selected_columns)}")
         self.df = self.df.select(selected_columns)
         return self
@@ -89,14 +108,28 @@ class DataFrameController(object):
         self.df = self.df.sort(columns, descending=desc)
         return self
     
-    def changetz(self, colname: str, timezone_from: str = "UTC", timezone_to: str = "Asia/Tokyo", new_colname: str = None):
+    def changetz(
+            self,
+            colname: str,
+            timezone_from: str = "UTC",
+            timezone_to: str = "Asia/Tokyo",
+            datetime_format: str = None
+        ):
         """[chainable] Changes the timezone of the specified date column."""
         logger.debug(f"change {colname} timezone {timezone_from} to {timezone_to}.")
-        new_colname = new_colname if new_colname else colname
-        self.df.with_columns(pl.col(colname).dt.replace_time_zone(timezone_from))
-        self.df = self.df.with_columns(
-            pl.col(colname).cast(pl.Datetime).dt.convert_time_zone(timezone_to).alias(new_colname)
-        )
+
+        if datetime_format:
+            self.df = self.df.with_columns(pl.col(colname).str.to_datetime(datetime_format))
+        else:
+            self.df = self.df.with_columns(pl.col(colname).str.to_datetime())
+
+        self.df = self.df.with_columns(pl.col(colname).dt.replace_time_zone(timezone_from))
+        self.df = self.df.with_columns(pl.col(colname).dt.convert_time_zone(timezone_to))
+        return self
+
+    def renamecol(self, colname: str, new_colname: str):
+        """[chainable] Rename specified column name."""
+        self.df = self.df.rename({colname: new_colname})
         return self
     
     # -- finalizer --
@@ -121,6 +154,10 @@ class DataFrameController(object):
     def show(self):
         """[finalizer] Outputs the processing results to the standard output."""
         self.df.collect().write_csv(sys.stdout)
+
+    def showtable(self):
+        """[finalizer] Outputs the processing results table to the standard output."""
+        print(self.df.collect())
     
     def dump(self, path: str = None):
         """[finalizer] Outputs the processing results to a CSV file."""
