@@ -63,7 +63,7 @@ Filter only on the specified columns.
 
 ```
 Arguments:
-  columns: Union[str, tuple[str]]
+  colnames: Union[str, tuple[str]]
 ```
 
 examples
@@ -116,7 +116,6 @@ Options:
 ```
 
 examples
-
 ```
 $ qsv load ./Security.csv - head 10
 ```
@@ -130,7 +129,6 @@ Options:
 ```
 
 examples
-
 ```
 $ qsv load ./Security.csv - tail 10
 ```
@@ -140,16 +138,28 @@ Sorts all rows by the specified column values.
 
 ```
 Arguments:
-  columns: str
+  colnames: Union[str, tuple[str]]
 
 Options:
   desc: bool = False
 ```
 
 examples
-
 ```
 $ qsv load ./Security.csv - sort 'Date and Time'
+```
+
+#### sort
+Remove duplicated rows by the specified column names.
+
+```
+Arguments:
+  colnames: Union[str, list[str]]
+```
+
+examples
+```
+$ qsv load ./Security.csv - uniq 'Event ID'
 ```
 
 #### changetz
@@ -157,16 +167,15 @@ Changes the timezone of the specified date column.
 
 ```
 Arguments:
-  columns: str
+  colname: str
 
 Options:
   timezone_from: str = "UTC"
   timezone_to: str = "Asia/Tokyo"
-  new_colname: str = None
+  datetime_format: str = None
 ```
 
 examples
-
 ```
 $ qsv load ./Security.csv - changetz 'Date and Time' --timezone_from=UTC --timezone_to=Asia/Tokyo --new_colname='Date and Time(JST)'
 ```
@@ -181,7 +190,6 @@ Options:
 ```
 
 examples
-
 ```
 $ qsv load ./Security.csv - headers
 ┏━━━━┳━━━━━━━━━━━━━━━┓
@@ -199,7 +207,6 @@ $ qsv load ./Security.csv - headers
 Displays the statistical information of the data.
 
 examples
-
 ```
 $ qsv load ./Security.csv - stats
 shape: (9, 6)
@@ -301,7 +308,7 @@ rules:
   head:
     number: 5
   select:
-    columns:
+    colnames:
       - RecordNumber
       - TimeCreated
   changetz:

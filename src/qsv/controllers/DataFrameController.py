@@ -45,14 +45,11 @@ class DataFrameController(object):
         return self
 
     # -- chainable --
-    def select(self, columns: Union[str, tuple[str]]):
+    def select(self, colnames: Union[str, tuple[str]]):
         """[chainable] Filter only on the specified columns."""
-        def parse_columns(headers: list[str], columns: Union[str, tuple[str]]):
-            # prevent type guessing
-            columns: tuple[str] = columns if type(columns) is tuple else (columns, )
-
+        def parse_columns(headers: list[str], colnames: tuple[str]):
             parsed_columns = list()
-            for col in columns:
+            for col in colnames:
                 if '-' in col:
                     # parse 'startcol-endcol' string
                     flag_extract = False
@@ -68,11 +65,15 @@ class DataFrameController(object):
                     parsed_columns.append(col)
             return parsed_columns
         
-        # for quilter
-        columns = tuple(columns) if type(columns) is list else columns
+        # prevent type guessing
+        colnames: tuple[str]
+        if type(colnames) is list:
+            colnames = tuple(colnames)
+        elif type(colnames) is str:
+            colnames = (colnames, )
 
-        selected_columns = parse_columns(headers=self.df.collect_schema().names(), columns=columns)
-        # selected_columns = parse_columns(headers=self.df.columns, columns=columns)
+        selected_columns = parse_columns(headers=self.df.collect_schema().names(), colnames=colnames)
+
         logger.debug(f"{len(selected_columns)} columns are selected. {', '.join(selected_columns)}")
         self.df = self.df.select(selected_columns)
         return self
@@ -109,10 +110,23 @@ class DataFrameController(object):
         self.df = self.df.tail(number)
         return self
     
-    def sort(self, columns: str, desc: bool = False):
+    def sort(self, colnames: str, desc: bool = False):
         """[chainable] Sorts all rows by the specified column values."""
-        logger.debug(f"sort by {columns} ({'desc' if desc else 'asc'}).")
-        self.df = self.df.sort(columns, descending=desc)
+        logger.debug(f"sort by {colnames} ({'desc' if desc else 'asc'}).")
+        self.df = self.df.sort(colnames, descending=desc)
+        return self
+    
+    def uniq(self, colnames: Union[str, tuple[str], list[str]]):
+        """[chainable] Remove duplicated rows by the specified column names."""
+        logger.debug(f"unique by {colnames}.")
+        # prevent type guessing
+        colnames: tuple[str]
+        if type(colnames) is list:
+            colnames = tuple(colnames)
+        elif type(colnames) is str:
+            colnames = (colnames, )
+        
+        self.df = self.df.unique(subset=colnames)
         return self
     
     def changetz(
