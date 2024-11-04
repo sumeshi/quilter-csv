@@ -21,6 +21,7 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = [
     "pdoc>=15.0.0",
+    "pytest>=8.3.3",
 ]
 
 [project.scripts]
