@@ -46,7 +46,7 @@ class DataFrameController(object):
 
     # -- chainable --
     def select(self, columns: Union[str, tuple[str]]):
-        """[chainable] Displays the specified columns."""
+        """[chainable] Filter only on the specified columns."""
         def parse_columns(headers: list[str], columns: Union[str, tuple[str]]):
             # prevent type guessing
             columns: tuple[str] = columns if type(columns) is tuple else (columns, )
@@ -78,32 +78,39 @@ class DataFrameController(object):
         return self
     
     def isin(self, colname: str, values: list):
-        """[chainable] Displays rows that contain the specified values."""
+        """[chainable] Filter rows containing the specified values."""
         logger.debug(f"filter condition: {values} in {colname}")
         self.df = self.df.filter(pl.col(colname).is_in(values))
         return self
     
     def contains(self, colname: str, regex: str):
-        """[chainable] Displays rows that contain the specified string."""
+        """[chainable] Filter rows containing the specified regex."""
         logger.debug(f"filter condition: {regex} contains {colname}")
         regex = regex if type(regex) is str else str(regex)
         self.df = self.df.filter(pl.col(colname).str.contains(regex))
         return self
 
+    def sed(self, colname: str, regex: str, replaced_text: str):
+        """[chainable] Replace values by specified regex."""
+        logger.debug(f"sed condition: {regex} on {colname}")
+        regex = regex if type(regex) is str else str(regex)
+        self.df = self.df.with_columns(pl.col(colname).cast(pl.String).str.replace(regex, replaced_text))
+        return self
+
     def head(self, number: int = 5):
-        """[chainable] Displays the first specified number of rows of the data."""
+        """[chainable] Filters only the specified number of lines from the first line."""
         logger.debug(f"heading {number} lines.")
         self.df = self.df.head(number)
         return self
 
     def tail(self, number: int = 5):
-        """[chainable] Displays the last specified number of rows of the data."""
+        """[chainable] Filters only the specified number of lines from the last line."""
         logger.debug(f"tailing {number} lines.")
         self.df = self.df.tail(number)
         return self
     
     def sort(self, columns: str, desc: bool = False):
-        """[chainable] Sorts the data by the values of the specified column."""
+        """[chainable] Sorts all rows by the specified column values."""
         logger.debug(f"sort by {columns} ({'desc' if desc else 'asc'}).")
         self.df = self.df.sort(columns, descending=desc)
         return self
