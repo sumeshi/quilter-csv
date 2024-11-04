@@ -24,18 +24,16 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install poetry
-          poetry config virtualenvs.in-project true
-          poetry install
+          pip install uv
 
       - name: build
         run: |
           pip install nuitka
-          poetry run python -m nuitka --standalone --onefile --follow-imports -o sscsv.exe --output-dir=dist --assume-yes-for-downloads src/sscsv/run.py
+          uv run python -m nuitka --standalone --onefile --follow-imports -o qsv.exe --output-dir=dist --assume-yes-for-downloads src/qsv/__init__.py
       
       - name: verify
         run: |
-          dist/sscsv.exe -h
+          dist/qsv.exe -h
       
       - name: create tag
         id: create_tag
@@ -53,7 +51,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.create_tag.outputs.version }}
-          files: dist/sscsv.exe
+          files: dist/qsv.exe
           name: Release ${{ steps.create_tag.outputs.version }}
           body: 'This release was automatically created by GitHub Actions.'
         env:
@@ -77,22 +75,21 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt install patchelf
-          pip install poetry
-          poetry install
+          pip install uv
 
       - name: build
         run: |
           pip install nuitka
-          poetry run python -m nuitka --standalone --onefile --follow-imports -o sscsv --output-dir=dist --assume-yes-for-downloads src/sscsv/run.py
+          uv run python -m nuitka --standalone --onefile --follow-imports -o qsv --output-dir=dist --assume-yes-for-downloads src/qsv/__init__.py
       
       - name: verify
         run: |
-          dist/sscsv -h
+          dist/qsv -h
 
       - name: upload asset to release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ needs.build-windows.outputs.version }}
-          files: dist/sscsv
+          files: dist/qsv
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

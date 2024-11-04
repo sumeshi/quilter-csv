@@ -1,6 +1,6 @@
 import logging
 import fire
-from sscsv.controllers.DataFrameController import DataFrameController
+from qsv.controllers.DataFrameController import DataFrameController
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -11,6 +11,7 @@ logging.basicConfig(
     ]
 )
 
+# entrypoint
 def main():
     fire.Fire(DataFrameController)
 
