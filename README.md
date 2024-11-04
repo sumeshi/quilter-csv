@@ -15,7 +15,7 @@ This project is inspired by [xsv](https://github.com/BurntSushi/xsv). We are cur
 This tool processes csv(comma-separated values) file by connecting three processes: initializer, chainable functions, and finalizer.  
 For example, you can load a csv file in the initializer, use a chainable functions to filter, sort, and select columns, and then output the resulting csv file in the finalizer.
 
-![](https://gist.github.com/sumeshi/644af27c8960a9b6be6c7470fe4dca59/raw/2a19fafd4f4075723c731e4a8c8d21c174cf0ffb/qsv.svg)
+![](https://gist.githubusercontent.com/sumeshi/644af27c8960a9b6be6c7470fe4dca59/raw/2a19fafd4f4075723c731e4a8c8d21c174cf0ffb/qsv.svg)
 
 ```bash
 $ qsv {{INITIALIZER}} {{Arguments}} - {{CHAINABLE}} {{Arguments}} - {{FINALIZER}} {{Arguments}}
