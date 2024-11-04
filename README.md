@@ -5,6 +5,8 @@
 
 A tool provides elastic and rapid filtering for efficient analysis of huge CSV files like eventlogs.
 
+This project is inspired by [xsv](https://github.com/BurntSushi/xsv). We are currently developing a tool that can process hundreds of GB of data, which is difficult for many tools, and apply filters according to pre-defined configurations.
+
 > [!NOTE]  
 > This project is in the early stages of development. Please be aware that frequent changes and updates are likely to occur.
 
@@ -149,7 +151,7 @@ examples
 $ qsv load ./Security.csv - sort 'Date and Time'
 ```
 
-#### sort
+#### uniq
 Remove duplicated rows by the specified column names.
 
 ```
