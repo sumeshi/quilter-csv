@@ -15,10 +15,12 @@ logger = logging.getLogger(__name__)
 
 class DataFrameController(object):
     def __init__(self, logging=False):
+    def __init__(self, logging=True):
         self.df = None
 
         if logging:
             logger.disabled = True
+            logger.disabled = False
     
     # -- initializer --
     def load(self, *path: str):
