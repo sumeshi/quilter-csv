@@ -1,8 +1,9 @@
 import re
 import sys
 import logging
-from datetime import datetime
 from typing import Union
+from datetime import datetime
+from pathlib import Path
 
 from qsv.controllers.CsvController import CsvController
 from qsv.controllers.QuiltController import QuiltController
@@ -18,9 +19,23 @@ logger.disabled = True
 class DataFrameController(object):
     def __init__(self):
         self.df = None
+    
+    # -- private methods --
+    def __check_exists_path(self, path: tuple[str]) -> None:
+        for p in path:
+            if not Path(p).exists():
+                print(f"[Error] File \"{p}\" does not exist.")
+                sys.exit(1)
+
+    def __check_exists_colnames(self, colnames: list[str]) -> None:
+        columns = self.df.collect_schema().names()
+        for colname in colnames:
+            if colname not in columns:
+                print(f"[Error] Column \"{colname}\" does not exist in the dataframe.")
+                sys.exit(1)
 
     # -- quilter --
-    def quilt(self, config: str, *path: str):
+    def quilt(self, config: str, *path: tuple[str]) -> None:
         """[quilter] Loads the specified quilt batch files."""
         logger.debug(f"config: {config}")
         logger.debug(f"{len(path)} files are loaded. [{', '.join(path)}]")
@@ -38,9 +53,10 @@ class DataFrameController(object):
                     getattr(self, k)()
         
     # -- initializer --
-    def load(self, *path: str):
+    def load(self, *path: tuple[str]):
         """[initializer] Loads the specified CSV files."""
         logger.debug(f"{len(path)} files are loaded. [{', '.join(path)}]")
+        self.__check_exists_path(path)
         self.df = CsvController(path=path).get_dataframe()
         return self
 
@@ -71,9 +87,8 @@ class DataFrameController(object):
             colnames = tuple(colnames)
         elif type(colnames) is str:
             colnames = (colnames, )
-
+        self.__check_exists_colnames(colnames)
         selected_columns = parse_columns(headers=self.df.collect_schema().names(), colnames=colnames)
-
         logger.debug(f"{len(selected_columns)} columns are selected. {', '.join(selected_columns)}")
         self.df = self.df.select(selected_columns)
         return self
@@ -81,24 +96,31 @@ class DataFrameController(object):
     def isin(self, colname: str, values: list):
         """[chainable] Filter rows containing the specified values."""
         logger.debug(f"filter condition: {values} in {colname}")
+        self.__check_exists_colnames([colname])
         self.df = self.df.filter(pl.col(colname).is_in(values))
         return self
     
-    def contains(self, colname: str, regex: str):
+    def contains(self, colname: str, regex: str, ignorecase: bool = False):
         """[chainable] Filter rows containing the specified regex."""
         logger.debug(f"filter condition: {regex} contains {colname}")
+        self.__check_exists_colnames([colname])
         regex = regex if type(regex) is str else str(regex)
-        self.df = self.df.filter(pl.col(colname).str.contains(regex))
+        self.df = self.df.filter(
+            pl.col(colname).str.contains(f"(?i){regex}") if ignorecase else pl.col(colname).str.contains(regex)
+        )
         return self
 
-    def sed(self, colname: str, regex: str, replaced_text: str):
+    def sed(self, colname: str, regex: str, replaced_text: str, ignorecase: bool = False):
         """[chainable] Replace values by specified regex."""
         logger.debug(f"sed condition: {regex} on {colname}")
+        self.__check_exists_colnames([colname])
         regex = regex if type(regex) is str else str(regex)
-        self.df = self.df.with_columns(pl.col(colname).cast(pl.String).str.replace(regex, replaced_text))
+        self.df = self.df.with_columns(
+            pl.col(colname).cast(pl.String).str.replace(f"(?i){regex}", replaced_text) if ignorecase else pl.col(colname).cast(pl.String).str.replace(regex, replaced_text)
+        )
         return self
     
-    def grep(self, regex: str):
+    def grep(self, regex: str, ignorecase: bool = False):
         """[chainable] Treats all cols as strings and filters only matched cols by searching with the specified regex"""
         self.df = self.df.with_columns(
             pl.concat_str(
@@ -107,7 +129,7 @@ class DataFrameController(object):
             ).alias('___combined')
         )
         self.df = self.df.filter(
-            pl.col('___combined').str.contains(regex)
+            pl.col('___combined').str.contains(f"(?i){regex}") if ignorecase else pl.col('___combined').str.contains(regex)
         )
         self.df = self.df.drop(['___combined'])
         return self
@@ -124,9 +146,16 @@ class DataFrameController(object):
         self.df = self.df.tail(number)
         return self
     
-    def sort(self, colnames: str, desc: bool = False):
+    def sort(self, colnames: Union[str, tuple[str], list[str]], desc: bool = False):
         """[chainable] Sorts all rows by the specified column values."""
         logger.debug(f"sort by {colnames} ({'desc' if desc else 'asc'}).")
+        # prevent type guessing
+        colnames: tuple[str]
+        if type(colnames) is list:
+            colnames = tuple(colnames)
+        elif type(colnames) is str:
+            colnames = (colnames, )
+        self.__check_exists_colnames(colnames)
         self.df = self.df.sort(colnames, descending=desc)
         return self
     
@@ -139,7 +168,7 @@ class DataFrameController(object):
             colnames = tuple(colnames)
         elif type(colnames) is str:
             colnames = (colnames, )
-        
+        self.__check_exists_colnames(colnames)
         self.df = self.df.unique(subset=colnames)
         return self
     
@@ -152,6 +181,7 @@ class DataFrameController(object):
         ):
         """[chainable] Changes the timezone of the specified date column."""
         logger.debug(f"change {colname} timezone {timezone_from} to {timezone_to}.")
+        self.__check_exists_colnames([colname])
 
         if datetime_format:
             self.df = self.df.with_columns(pl.col(colname).str.to_datetime(datetime_format))
@@ -164,37 +194,39 @@ class DataFrameController(object):
 
     def renamecol(self, colname: str, new_colname: str):
         """[chainable] Rename specified column name."""
+        self.__check_exists_colnames([colname])
         self.df = self.df.rename({colname: new_colname})
         return self
     
     # -- finalizer --
-    def headers(self, plain: bool = False):
+    def headers(self, plain: bool = False) -> None:
         """[finalizer] Displays the column names of the data."""
         if plain:
             print(",".join([f"\"{c}\"" for c in self.df.collect_schema().names()]))
         else:
+            digits = len(str(len(self.df.collect_schema().names())))
             TableView.print(
                 headers=["#", "Column Name"],
-                values=[[str(i).zfill(2), c] for i, c in enumerate(self.df.collect_schema().names())]
+                values=[[str(i).zfill(digits), c] for i, c in enumerate(self.df.collect_schema().names())]
             )
     
-    def stats(self):
+    def stats(self) -> None:
         """[finalizer] Displays the statistical information of the data."""
         print(self.df.describe())       
 
-    def showquery(self):
+    def showquery(self) -> None:
         """[finalizer] Displays the data processing query."""
         print(self.df)
 
-    def show(self):
+    def show(self) -> None:
         """[finalizer] Outputs the processing results to the standard output."""
         self.df.collect().write_csv(sys.stdout)
 
-    def showtable(self):
+    def showtable(self) -> None:
         """[finalizer] Outputs the processing results table to the standard output."""
         print(self.df.collect())
     
-    def dump(self, path: str = None):
+    def dump(self, path: str = None) -> None:
         """[finalizer] Outputs the processing results to a CSV file."""
         def autoname():
             now = datetime.now().strftime('%Y%m%d-%H%M%S')

@@ -47,7 +47,7 @@ shape: (3, 5)
 Loads the specified CSV files.
 ```
 Arguments:
-  path*: str
+  *path: tuple[str]
 ```
 
 examples
@@ -102,11 +102,44 @@ Filter rows containing the specified regex.
 Arguments:
   colname: str
   regex: str
+  ignorecase: bool = False
 ```
 
 examples
 ```
 $ qsv load ./Security.csv - contains 'Date and Time' '10/6/2016'
+```
+
+#### sed
+Replace values by specified regex.
+
+```
+Arguments:
+  colname: str
+  regex: str
+  replaced_text: str
+  ignorecase: bool = False
+```
+
+examples
+```
+$ qsv load ./Security.csv - sed 'Date and Time' '/' '-'
+```
+
+#### grep
+Treats all cols as strings and filters only matched cols by searching with the specified regex.
+
+This function is similar to running a grep command leaving the HEADER.
+
+```
+Arguments:
+  regex: str
+  ignorecase: bool = False
+```
+
+examples
+```
+$ qsv load ./Security.csv - grep 'LogonType'
 ```
 
 #### head
@@ -140,7 +173,7 @@ Sorts all rows by the specified column values.
 
 ```
 Arguments:
-  colnames: Union[str, tuple[str]]
+  colnames: Union[str, tuple[str], list[str]]
 
 Options:
   desc: bool = False
@@ -156,7 +189,7 @@ Remove duplicated rows by the specified column names.
 
 ```
 Arguments:
-  colnames: Union[str, list[str]]
+  colnames: Union[str, tuple[str], list[str]]
 ```
 
 examples
@@ -166,6 +199,8 @@ $ qsv load ./Security.csv - uniq 'Event ID'
 
 #### changetz
 Changes the timezone of the specified date column.
+
+The method of writing datetime format is the same as in [python](https://docs.python.org/ja/3/library/datetime.html) (1989 C Standard).
 
 ```
 Arguments:
@@ -179,7 +214,21 @@ Options:
 
 examples
 ```
-$ qsv load ./Security.csv - changetz 'Date and Time' --timezone_from=UTC --timezone_to=Asia/Tokyo --new_colname='Date and Time(JST)'
+$ qsv load ./Security.csv - changetz 'Date and Time' --timezone_from=UTC --timezone_to=Asia/Tokyo --datetime_format="%m/%d/%Y %I:%M:%S %p"
+```
+
+#### renamecol
+Rename specified column name.
+
+```
+Arguments:
+  colname: str
+  new_colname: str
+```
+
+examples
+```
+$ qsv load ./Security.csv - renamecol 'Event ID' 'EventID'
 ```
 
 ### Finalizer
@@ -293,6 +342,12 @@ Quilt is a command that pre-defines a series of the above Initializer - Chainabl
 e.g
 ```
 $ qsv quilt rules ./Security.csv
+```
+
+```
+Arguments:
+  config: str
+  *path: tuple[str]
 ```
 
 rules/test.yaml
