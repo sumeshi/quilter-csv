@@ -1,6 +1,6 @@
 [project]
 name = "qsv"
-version = "0.3.4"
+version = "0.3.5"
 description = "A tool that provides elastic and rapid filtering for efficient analysis of huge CSV files, such as eventlogs."
 readme = "README.md"
 authors = [
