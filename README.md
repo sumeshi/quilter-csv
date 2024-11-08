@@ -1,31 +1,38 @@
 # Quilter-CSV
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 [![PyPI version](https://badge.fury.io/py/qsv.svg)](https://badge.fury.io/py/qsv)
-[![Python Versions](https://img.shields.io/pypi/pyversions/qsv.svg)](https://pypi.org/project/qsv/)
 
-A tool provides elastic and rapid filtering for efficient analysis of huge CSV files like eventlogs.
+![quilter-csv](https://github.com/user-attachments/assets/288ebc12-b255-4914-8719-578392426f9d)
 
-This project is inspired by [xsv](https://github.com/BurntSushi/xsv). We are currently developing a tool that can process hundreds of GB of data, which is difficult for many tools, and apply filters according to pre-defined configurations.
+A tool that provides elastic and rapid filtering for efficient analysis of huge CSV files, such as eventlogs.
+
+This project is inspired by [xsv](https://github.com/BurntSushi/xsv). We are currently developing a tool that can process hundreds of gigabytes of data, which is challenging for many tools, and apply filters according to predefined configurations.
 
 > [!NOTE]  
 > This project is in the early stages of development. Please be aware that frequent changes and updates are likely to occur.
 
 ## Description
-### Archtecture
-This tool processes csv(comma-separated values) file by connecting three processes: initializer, chainable functions, and finalizer.  
-For example, you can load a csv file in the initializer, use a chainable functions to filter, sort, and select columns, and then output the resulting csv file in the finalizer.
+### Motivation
+In digital forensics and log analysis, we often have to examine extremely large CSV files, sometimes amounting to tens or hundreds of gigabytes across dozens or even hundreds of machines.  
+Most of these tasks are standardized processes, but accomplishing them usually requires using analysis tools so large and complex that understanding their specifications or definitions is nearly impossible, or writing intricate shell scripts that are difficult to debug.  
+The core feature of this tool is the Quilt command, which simply and faithfully executes tasks that can be performed via the CLI.  
+We hope this tool will serve as a solution for anyone facing similar challenges.
+
+### Architecture
+This tool processes CSV (comma-separated values) files by connecting three processes: initializer, chainable functions, and finalizer.  
+For example, you can load a csv file in the initializer, use chainable functions to filter, sort, and select columns, and then output the resulting csv file in the finalizer.
 
 ![](https://gist.githubusercontent.com/sumeshi/644af27c8960a9b6be6c7470fe4dca59/raw/2a19fafd4f4075723c731e4a8c8d21c174cf0ffb/qsv.svg)
 
 ```bash
 $ qsv {{INITIALIZER}} {{Arguments}} - {{CHAINABLE}} {{Arguments}} - {{FINALIZER}} {{Arguments}}
 ```
-Each process must be explicitly separated by a “-”.
+Each process must be explicitly separated by a hyphen ("-").
 
 
 ## Usage
 e.g.
-Below is an example of reading a CSV file, extracting rows that contain 4624 in the EventID column, and displaying the top 3 rows them sorted by the Timestamp column.
+Below is an example of reading a CSV file, extracting rows that contain 4624 in the 'Event ID' column, and displaying the top 3 rows sorted by the 'Date and Time' column.
 
 ```bash
 $ qsv load Security.csv - isin 'Event ID' 4624 - sort 'Date and Time' - head 3
@@ -61,7 +68,7 @@ $ qsv load ./logs/*.csv
 
 ### Chainable Functions
 #### select
-Filter only on the specified columns.
+Selects only the specified columns.
 
 ```
 Arguments:
@@ -82,7 +89,7 @@ $ qsv load ./Security.csv - select "'Date and Time,Event ID'"
 ```
 
 #### isin
-Filter rows containing the specified values.
+Filters rows containing the specified values.
 
 ```
 Arguments:
@@ -96,7 +103,7 @@ $ qsv load ./Security.csv - isin 'Event ID' 4624,4634
 ```
 
 #### contains
-Filter rows containing the specified regex.
+Filters rows where the specified column matches the given regex.
 
 ```
 Arguments:
@@ -111,7 +118,7 @@ $ qsv load ./Security.csv - contains 'Date and Time' '10/6/2016'
 ```
 
 #### sed
-Replace values by specified regex.
+Replaces values using the specified regex.
 
 ```
 Arguments:
@@ -127,9 +134,8 @@ $ qsv load ./Security.csv - sed 'Date and Time' '/' '-'
 ```
 
 #### grep
-Treats all cols as strings and filters only matched cols by searching with the specified regex.
-
-This function is similar to running a grep command leaving the HEADER.
+Treats all columns as strings and filters rows where any column matches the specified regex.  
+This function is similar to running a grep command while preserving the header row.
 
 ```
 Arguments:
@@ -143,7 +149,7 @@ $ qsv load ./Security.csv - grep 'LogonType'
 ```
 
 #### head
-Filters only the specified number of lines from the first line.
+Selects only the first N lines.
 
 ```
 Options:
@@ -156,7 +162,7 @@ $ qsv load ./Security.csv - head 10
 ```
 
 #### tail
-Filters only the specified number of lines from the last line.
+Selects only the last N lines.
 
 ```
 Options:
@@ -185,7 +191,7 @@ $ qsv load ./Security.csv - sort 'Date and Time'
 ```
 
 #### uniq
-Remove duplicated rows by the specified column names.
+Remove duplicate rows based on the specified column names.
 
 ```
 Arguments:
@@ -200,7 +206,7 @@ $ qsv load ./Security.csv - uniq 'Event ID'
 #### changetz
 Changes the timezone of the specified date column.
 
-The method of writing datetime format is the same as in [python](https://docs.python.org/ja/3/library/datetime.html) (1989 C Standard).
+The datetime format strings follow the same conventions as [Python](https://docs.python.org/3/library/datetime.html)'s datetime module (based on the C99 standard).
 
 ```
 Arguments:
@@ -218,7 +224,7 @@ $ qsv load ./Security.csv - changetz 'Date and Time' --timezone_from=UTC --timez
 ```
 
 #### renamecol
-Rename specified column name.
+Renames the specified column.
 
 ```
 Arguments:
@@ -291,7 +297,7 @@ naive plan: (run LazyFrame.explain(optimized=True) to see the optimized plan)
 ```
 
 #### show
-Outputs the processing results to the standard output.
+Displays the processing results in a table format to standard output.
 
 examples
 ```
@@ -337,7 +343,7 @@ $ qsv load Security.csv - dump ./Security-qsv.csv
 
 
 ### Quilt
-Quilt is a command that pre-defines a series of the above Initializer - Chainable Functions - Finalizer processes in a yaml rule and executes them all at once.
+Quilt is a command that allows you to predefine a series of Initializer, Chainable Functions, and Finalizer processes in a YAML configuration file, and then execute them all at once.
 
 e.g
 ```
@@ -389,7 +395,7 @@ $ pip install qsv
 ```
 
 ### from GitHub Releases
-The version compiled into a binary using Nuitka is also available for use.
+A version a Nuitka-compiled binary version is also [available](https://github.com/sumeshi/quilter-csv/releases).
 
 #### Ubuntu
 ```
@@ -403,4 +409,4 @@ $ ./qsv {{options...}}
 ```
 
 ## License
-Quilter-csv is released under the [MIT](https://github.com/sumeshi/quilter-csv/blob/master/LICENSE) License.
+Quilter-CSV is released under the [MIT](https://github.com/sumeshi/quilter-csv/blob/master/LICENSE) License.

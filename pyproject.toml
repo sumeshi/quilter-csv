@@ -1,7 +1,7 @@
 [project]
 name = "qsv"
-version = "0.3.3"
-description = "A tool designed for rapid CSV file processing and filtering, specifically designed for log analysis."
+version = "0.3.4"
+description = "A tool that provides elastic and rapid filtering for efficient analysis of huge CSV files, such as eventlogs."
 readme = "README.md"
 authors = [
     { name = "sumeshi", email = "sum3sh1@protonmail.com" }

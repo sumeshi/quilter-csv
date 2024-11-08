@@ -62,7 +62,7 @@ class DataFrameController(object):
 
     # -- chainable --
     def select(self, colnames: Union[str, tuple[str]]):
-        """[chainable] Filter only on the specified columns."""
+        """[chainable] Selects only the specified columns."""
         def parse_columns(headers: list[str], colnames: tuple[str]):
             parsed_columns = list()
             for col in colnames:
@@ -94,14 +94,14 @@ class DataFrameController(object):
         return self
     
     def isin(self, colname: str, values: list):
-        """[chainable] Filter rows containing the specified values."""
+        """[chainable] Filters rows containing the specified values."""
         logger.debug(f"filter condition: {values} in {colname}")
         self.__check_exists_colnames([colname])
         self.df = self.df.filter(pl.col(colname).is_in(values))
         return self
     
     def contains(self, colname: str, regex: str, ignorecase: bool = False):
-        """[chainable] Filter rows containing the specified regex."""
+        """[chainable] Filters rows where the specified column matches the given regex."""
         logger.debug(f"filter condition: {regex} contains {colname}")
         self.__check_exists_colnames([colname])
         regex = regex if type(regex) is str else str(regex)
@@ -111,7 +111,7 @@ class DataFrameController(object):
         return self
 
     def sed(self, colname: str, regex: str, replaced_text: str, ignorecase: bool = False):
-        """[chainable] Replace values by specified regex."""
+        """[chainable] Replaces values using the specified regex."""
         logger.debug(f"sed condition: {regex} on {colname}")
         self.__check_exists_colnames([colname])
         regex = regex if type(regex) is str else str(regex)
@@ -121,7 +121,7 @@ class DataFrameController(object):
         return self
     
     def grep(self, regex: str, ignorecase: bool = False):
-        """[chainable] Treats all cols as strings and filters only matched cols by searching with the specified regex"""
+        """[chainable] Treats all columns as strings and filters rows where any column matches the specified regex."""
         self.df = self.df.with_columns(
             pl.concat_str(
                 [pl.col(colname).cast(pl.String).fill_null("") for colname in self.df.collect_schema().names()],
@@ -135,13 +135,13 @@ class DataFrameController(object):
         return self
 
     def head(self, number: int = 5):
-        """[chainable] Filters only the specified number of lines from the first line."""
+        """[chainable] Selects only the first N lines."""
         logger.debug(f"heading {number} lines.")
         self.df = self.df.head(number)
         return self
 
     def tail(self, number: int = 5):
-        """[chainable] Filters only the specified number of lines from the last line."""
+        """[chainable] Selects only the last N lines."""
         logger.debug(f"tailing {number} lines.")
         self.df = self.df.tail(number)
         return self
@@ -160,7 +160,7 @@ class DataFrameController(object):
         return self
     
     def uniq(self, colnames: Union[str, tuple[str], list[str]]):
-        """[chainable] Remove duplicated rows by the specified column names."""
+        """[chainable] Remove duplicate rows based on the specified column names."""
         logger.debug(f"unique by {colnames}.")
         # prevent type guessing
         colnames: tuple[str]
@@ -193,7 +193,7 @@ class DataFrameController(object):
         return self
 
     def renamecol(self, colname: str, new_colname: str):
-        """[chainable] Rename specified column name."""
+        """[chainable] Renames the specified column."""
         self.__check_exists_colnames([colname])
         self.df = self.df.rename({colname: new_colname})
         return self
@@ -219,7 +219,7 @@ class DataFrameController(object):
         print(self.df)
 
     def show(self) -> None:
-        """[finalizer] Outputs the processing results to the standard output."""
+        """[finalizer] Displays the processing results in a table format to standard output."""
         self.df.collect().write_csv(sys.stdout)
 
     def showtable(self) -> None:
