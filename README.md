@@ -2,7 +2,7 @@
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 [![PyPI version](https://badge.fury.io/py/qsv.svg)](https://badge.fury.io/py/qsv)
 
-![quilter-csv](https://github.com/user-attachments/assets/288ebc12-b255-4914-8719-578392426f9d)
+![quilter-csv](https://gist.githubusercontent.com/sumeshi/644af27c8960a9b6be6c7470fe4dca59/raw/4115bc2ccf9ab5fb40a455c34ac0be885b7f263d/quilter-csv.svg)
 
 A tool that provides elastic and rapid filtering for efficient analysis of huge CSV files, such as eventlogs.
 
