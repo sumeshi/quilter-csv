@@ -16,15 +16,18 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v3
+        shell: bash
 
       - name: install python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+        shell: bash
 
       - name: Install dependencies
         run: |
           pip install uv
+        shell: bash
 
       - name: Get version
         id: get_version
@@ -36,11 +39,13 @@ jobs:
       - name: build
         run: |
           uv add --dev nuitka
-          uv run python -m nuitka --standalone --onefile --follow-imports -o qsv-$env:version.exe --output-dir=dist --assume-yes-for-downloads src/qsv/__init__.py
+          uv run python -m nuitka --standalone --onefile --follow-imports -o qsv-$version.exe --output-dir=dist --assume-yes-for-downloads src/qsv/__init__.py
+        shell: bash
       
       - name: verify
         run: |
-          dist/qsv-$env:version.exe -h
+          dist/qsv-$version.exe -h
+        shell: bash
       
       - name: create tag
         id: create_tag
