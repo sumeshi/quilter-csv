@@ -36,11 +36,11 @@ jobs:
       - name: build
         run: |
           uv add --dev nuitka
-          uv run python -m nuitka --standalone --onefile --follow-imports -o qsv-$version.exe --output-dir=dist --assume-yes-for-downloads src/qsv/__init__.py
+          uv run python -m nuitka --standalone --onefile --follow-imports -o qsv-$env:version.exe --output-dir=dist --assume-yes-for-downloads src/qsv/__init__.py
       
       - name: verify
         run: |
-          dist/qsv-$version.exe -h
+          dist/qsv-$env:version.exe -h
       
       - name: create tag
         id: create_tag
