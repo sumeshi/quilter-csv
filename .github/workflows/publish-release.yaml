@@ -100,6 +100,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.build-windows.outputs.version }}
-          files: dist/qsv-$version
+          files: dist/qsv-${{ needs.build-windows.outputs.version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
