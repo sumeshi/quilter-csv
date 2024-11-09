@@ -183,11 +183,14 @@ class DataFrameController(object):
         logger.debug(f"change {colname} timezone {timezone_from} to {timezone_to}.")
         self.__check_exists_colnames([colname])
 
-        if datetime_format:
-            self.df = self.df.with_columns(pl.col(colname).str.to_datetime(datetime_format))
-        else:
-            self.df = self.df.with_columns(pl.col(colname).str.to_datetime())
+        # convert string to datetime
+        if self.df.select(colname).collect_schema().dtypes()[0] != pl.Datetime:
+            if datetime_format:
+                self.df = self.df.with_columns(pl.col(colname).str.to_datetime(datetime_format))
+            else:
+                self.df = self.df.with_columns(pl.col(colname).str.to_datetime())
 
+        # setup and change timezone
         self.df = self.df.with_columns(pl.col(colname).dt.replace_time_zone(timezone_from))
         self.df = self.df.with_columns(pl.col(colname).dt.convert_time_zone(timezone_to))
         return self
