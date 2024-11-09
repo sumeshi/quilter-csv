@@ -215,7 +215,7 @@ wheels = [
 
 [[package]]
 name = "qsv"
-version = "0.3.2"
+version = "0.3.6"
 source = { editable = "." }
 dependencies = [
     { name = "fire" },
@@ -224,7 +224,7 @@ dependencies = [
     { name = "rich" },
 ]
 
-[package.dependency-groups]
+[package.dev-dependencies]
 dev = [
     { name = "pdoc" },
     { name = "pytest" },
@@ -238,7 +238,7 @@ requires-dist = [
     { name = "rich", specifier = ">=13.9.3" },
 ]
 
-[package.metadata.dependency-groups]
+[package.metadata.requires-dev]
 dev = [
     { name = "pdoc", specifier = ">=15.0.0" },
     { name = "pytest", specifier = ">=8.3.3" },
