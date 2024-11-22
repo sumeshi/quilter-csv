@@ -55,6 +55,10 @@ Loads the specified CSV files.
 ```
 Arguments:
   *path: tuple[str]
+
+Options:
+  separator: str = ','
+  low_memory: bool = False
 ```
 
 examples

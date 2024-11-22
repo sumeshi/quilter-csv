@@ -53,11 +53,11 @@ class DataFrameController(object):
                     getattr(self, k)()
         
     # -- initializer --
-    def load(self, *path: tuple[str]):
+    def load(self, *path: tuple[str], separator: str = ',', low_memory: bool = False):
         """[initializer] Loads the specified CSV files."""
         logger.debug(f"{len(path)} files are loaded. [{', '.join(path)}]")
         self.__check_exists_path(path)
-        self.df = CsvController(path=path).get_dataframe()
+        self.df = CsvController(path=path).get_dataframe(separator=separator, low_memory=low_memory)
         return self
 
     # -- chainable --
