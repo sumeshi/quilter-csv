@@ -1,1 +1,0 @@
-poetry run python -m nuitka --standalone --onefile --follow-imports -o sscsv --output-dir=dist --assume-yes-for-downloads src/sscsv/run.py
