@@ -36,12 +36,12 @@ jobs:
       - name: build
         run: |
           uv add --dev nuitka
-          uv run python -m nuitka --standalone --onefile --follow-imports -o qsv-$version.exe --output-dir=dist --assume-yes-for-downloads src/qsv/__init__.py
+          uv run python -m nuitka --standalone --onefile --follow-imports -o qsv-$version-windows-x64.exe --output-dir=dist --assume-yes-for-downloads src/qsv/__init__.py
         shell: bash
       
       - name: verify
         run: |
-          dist/qsv-$version.exe -h
+          dist/qsv-$version-windows-x64.exe -h
         shell: bash
       
       - name: create tag
@@ -59,7 +59,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ steps.create_tag.outputs.version }}
-          files: dist/qsv-${{ steps.create_tag.outputs.version }}.exe
+          files: dist/qsv-${{ steps.create_tag.outputs.version }}-windows-x64.exe
           name: Release v${{ steps.create_tag.outputs.version }}
           body: 'This release was automatically created by GitHub Actions.'
         env:
@@ -90,16 +90,16 @@ jobs:
       - name: build
         run: |
           uv add --dev nuitka
-          uv run python -m nuitka --standalone --onefile --follow-imports -o qsv-$version --output-dir=dist --assume-yes-for-downloads src/qsv/__init__.py
+          uv run python -m nuitka --standalone --onefile --follow-imports -o qsv-$version-ubuntu-x64 --output-dir=dist --assume-yes-for-downloads src/qsv/__init__.py
       
       - name: verify
         run: |
-          dist/qsv-$version -h
+          dist/qsv-$version-ubuntu-x64 -h
 
       - name: upload asset to release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.build-windows.outputs.version }}
-          files: dist/qsv-${{ needs.build-windows.outputs.version }}
+          files: dist/qsv-${{ needs.build-windows.outputs.version }}-ubuntu-x64
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
