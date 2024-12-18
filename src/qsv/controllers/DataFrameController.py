@@ -209,7 +209,7 @@ class DataFrameController(object):
         else:
             digits = len(str(len(self.df.collect_schema().names())))
             TableView.print(
-                headers=["#", "Column Name"],
+                headers=[f"{''.join([' ' for _ in range(0, digits-1)])}#", "Column Name"],
                 values=[[str(i).zfill(digits), c] for i, c in enumerate(self.df.collect_schema().names())]
             )
     
