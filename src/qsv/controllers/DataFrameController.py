@@ -100,27 +100,27 @@ class DataFrameController(object):
         self.df = self.df.filter(pl.col(colname).is_in(values))
         return self
     
-    def contains(self, colname: str, regex: str, ignorecase: bool = False):
+    def contains(self, colname: str, pattern: str, ignorecase: bool = False):
         """[chainable] Filters rows where the specified column matches the given regex."""
-        logger.debug(f"filter condition: {regex} contains {colname}")
+        logger.debug(f"filter condition: {pattern} contains {colname}")
         self.__check_exists_colnames([colname])
-        regex = regex if type(regex) is str else str(regex)
+        pattern = pattern if type(pattern) is str else str(pattern)
         self.df = self.df.filter(
-            pl.col(colname).str.contains(f"(?i){regex}") if ignorecase else pl.col(colname).str.contains(regex)
+            pl.col(colname).str.contains(f"(?i){pattern}") if ignorecase else pl.col(colname).str.contains(pattern)
         )
         return self
 
-    def sed(self, colname: str, regex: str, replaced_text: str, ignorecase: bool = False):
+    def sed(self, colname: str, pattern: str, replacement: str, ignorecase: bool = False):
         """[chainable] Replaces values using the specified regex."""
-        logger.debug(f"sed condition: {regex} on {colname}")
+        logger.debug(f"sed condition: {pattern} on {colname}")
         self.__check_exists_colnames([colname])
-        regex = regex if type(regex) is str else str(regex)
+        pattern = pattern if type(pattern) is str else str(pattern)
         self.df = self.df.with_columns(
-            pl.col(colname).cast(pl.String).str.replace(f"(?i){regex}", replaced_text) if ignorecase else pl.col(colname).cast(pl.String).str.replace(regex, replaced_text)
+            pl.col(colname).cast(pl.String).str.replace(f"(?i){pattern}", replacement) if ignorecase else pl.col(colname).cast(pl.String).str.replace(pattern, replacement)
         )
         return self
     
-    def grep(self, regex: str, ignorecase: bool = False):
+    def grep(self, pattern: str, ignorecase: bool = False):
         """[chainable] Treats all columns as strings and filters rows where any column matches the specified regex."""
         self.df = self.df.with_columns(
             pl.concat_str(
@@ -129,7 +129,7 @@ class DataFrameController(object):
             ).alias('___combined')
         )
         self.df = self.df.filter(
-            pl.col('___combined').str.contains(f"(?i){regex}") if ignorecase else pl.col('___combined').str.contains(regex)
+            pl.col('___combined').str.contains(f"(?i){pattern}") if ignorecase else pl.col('___combined').str.contains(pattern)
         )
         self.df = self.df.drop(['___combined'])
         return self
@@ -176,7 +176,7 @@ class DataFrameController(object):
             self,
             colname: str,
             timezone_from: str = "UTC",
-            timezone_to: str = "Asia/Tokyo",
+            timezone_to: str = "UTC",
             datetime_format: str = None
         ):
         """[chainable] Changes the timezone of the specified date column."""
