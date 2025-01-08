@@ -35,7 +35,7 @@ class DataFrameController(object):
                 sys.exit(1)
 
     # -- quilter --
-    def quilt(self, config: str, *path: tuple[str]) -> None:
+    def quilt(self, config: str, *path: tuple[str], debug: bool = False) -> None:
         """[quilter] Loads the specified quilt batch files."""
         logger.debug(f"config: {config}")
         logger.debug(f"{len(path)} files are loaded. [{', '.join(path)}]")
@@ -45,12 +45,22 @@ class DataFrameController(object):
 
         for c in configs:
             for k, v in c.get('rules').items():
+                # for allow duplicated rulenames.
+                k = k if not k.endswith('_') else re.sub(r'_+$', '', k) 
+
+                if debug:
+                    print(f"{k}: {v}")
+
                 if k == 'load':
                     self.load(*path)
                 elif v:
                     getattr(self, k)(**v)
                 else:
                     getattr(self, k)()
+
+                if debug:
+                    print(self.df.collect())
+                    print()
         
     # -- initializer --
     def load(self, *path: tuple[str], separator: str = ',', low_memory: bool = False):
