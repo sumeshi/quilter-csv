@@ -318,6 +318,7 @@ Quilt is a command that allows you to predefine a series of Initializer, Chainab
 | -------- | --------- | ---------- | ------------- | --------------------------------------------------------------------------------------------------------------- |
 | Argument | config    | str        |               | The path to a YAML configuration file defining a set of initialization, transformation, and finalization steps. |
 | Argument | path      | tuple[str] |               | One or more paths to CSV files to be processed according to the predefined rules in the configuration file.     |
+| Option   | debug     | bool       | False         | Enabling this option will output each rule and its intermediate processing results to the standard output.      |
 
 ```
 $ qsv quilt rules ./Security.csv
@@ -348,6 +349,8 @@ rules:
     datetime_format: "%Y-%m-%d %H:%M:%S%.f"
   showtable:
 ```
+
+Note: While the standard YAML specification does not permit duplicate key names, Quilt rules allow for duplicate keys under the rules section. Specifically, even when multiple renamecol entries are listed, they are internally replaced and processed as renamecol, renamecol_, renamecol__, and so on. This approach enables each entry to be recognized and handled as distinct rules.
 
 ## Planned Features:
 - CSV cache (.pkl, duckdb, etc.)
