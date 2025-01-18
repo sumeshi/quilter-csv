@@ -3,7 +3,7 @@
 [![PyPI version](https://badge.fury.io/py/qsv.svg)](https://badge.fury.io/py/qsv)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/qsv)
 
-![quilter-csv](https://gist.githubusercontent.com/sumeshi/644af27c8960a9b6be6c7470fe4dca59/raw/4115bc2ccf9ab5fb40a455c34ac0be885b7f263d/quilter-csv.svg)
+![quilter-csv](https://gist.githubusercontent.com/sumeshi/644af27c8960a9b6be6c7470fe4dca59/raw/00d774e6814a462eb48e68f29fc6226976238777/quilter-csv.svg)
 
 A tool that provides elastic and rapid filtering for efficient analysis of huge CSV files, such as eventlogs.
 
@@ -318,7 +318,7 @@ Quilt is a command-line tool that allows you to define a sequence of **Initializ
 
 | Category | Parameter | Data Type  | Default Value | Description                                                                                                 |
 | -------- | --------- | ---------- | ------------- | ----------------------------------------------------------------------------------------------------------- |
-| Argument | config    | str        |               | Path to a YAML configuration file that defines initializers, chainable functions, and finalizers steps.     |
+| Argument | config    | str        |               | Path to a YAML configuration file/directory that defines initializers, chainable functions, and finalizers steps.     |
 | Argument | path      | tuple[str] |               | One or more paths to CSV files to be processed according to the predefined rules in the configuration file. |
 
 #### Command Example
