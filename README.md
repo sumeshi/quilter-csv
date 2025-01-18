@@ -107,7 +107,7 @@ Filters rows where the specified column matches the given regex.
 | -------- | ---------- | --------- | ------------- | -------------------------------------------------------------------- |
 | Argument | colname    | str       |               | The name of the column to test against the regex pattern.            |
 | Argument | pattern    | str       |               | A regular expression pattern used for matching values in the column. |
-| Argument | ignorecase | bool      | False         | If True, performs case-insensitive pattern matching.                 |
+| Option   | ignorecase | bool      | False         | If True, performs case-insensitive pattern matching.                 |
 
 ```
 $ qsv load ./Security.csv - contains 'Date and Time' '10/6/2016'
@@ -121,7 +121,7 @@ Replaces values using the specified regex.
 | Argument | colname     | str       |               | The name of the column whose values will be modified.                  |
 | Argument | pattern     | str       |               | A regular expression pattern identifying substrings to replace.        |
 | Argument | replacement | str       |               | The text that replaces matched substrings.                             |
-| Argument | ignorecase  | bool      | False         | If True, the regex matching is performed in a case-insensitive manner. |
+| Option   | ignorecase  | bool      | False         | If True, the regex matching is performed in a case-insensitive manner. |
 
 ```
 $ qsv load ./Security.csv - sed 'Date and Time' '/' '-'
@@ -134,7 +134,7 @@ This function is similar to running a grep command while preserving the header r
 | Category | Parameter  | Data Type | Default Value | Description                                                                     |
 | -------- | ---------- | --------- | ------------- | ------------------------------------------------------------------------------- |
 | Argument | pattern    | str       |               | A regular expression pattern used to filter rows. Any row with a match is kept. |
-| Argument | ignorecase | bool      | False         | If True, the regex match is case-insensitive.                                   |
+| Option   | ignorecase | bool      | False         | If True, the regex match is case-insensitive.                                   |
 
 ```
 $ qsv load ./Security.csv - grep 'LogonType'
@@ -191,12 +191,12 @@ Changes the timezone of the specified date column.
 
 The datetime format strings follow the same conventions as [Python](https://docs.python.org/3/library/datetime.html)'s datetime module (based on the C99 standard).
 
-| Category | Parameter       | Data Type | Default Value | Description                                                                                    |
-| -------- | --------------- | --------- | ------------- | ---------------------------------------------------------------------------------------------- |
-| Argument | colname         | str       |               | The name of the date/time column to convert.                                                   |
-| Option   | timezone_from   | str       | "UTC"         | The original timezone of the column's values.                                                  |
-| Option   | timezone_to     | str       | "UTC"  | The target timezone to convert values into.                                                    |
-| Option   | datetime_format | str       | AutoDetect    | The datetime format for parsing values. If not provided, the format is automatically inferred. |
+| Category | Parameter | Data Type | Default Value | Description                                                                                    |
+| -------- | --------- | --------- | ------------- | ---------------------------------------------------------------------------------------------- |
+| Argument | colname   | str       |               | The name of the date/time column to convert.                                                   |
+| Option   | tz_from   | str       | "UTC"         | The original timezone of the column's values.                                                  |
+| Option   | tz_to     | str       | "UTC"         | The target timezone to convert values into.                                                    |
+| Option   | dt_format | str       | AutoDetect    | The datetime format for parsing values. If not provided, the format is automatically inferred. |
 
 ```
 $ qsv load ./Security.csv - changetz 'Date and Time' --timezone_from=UTC --timezone_to=Asia/Tokyo --datetime_format="%m/%d/%Y %I:%M:%S %p"
