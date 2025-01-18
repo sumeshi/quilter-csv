@@ -59,6 +59,10 @@ class DataFrameController(object):
     def renamecol(self, colname: str, new_colname: str):
         self.df = renamecol(df=self.df, colname=colname, new_colname=new_colname)
         return self
+
+    def drop(self):
+        self.df = None
+        return self
     
     # -- finalizer --
     def headers(self, plain: bool = False) -> None:
@@ -80,8 +84,8 @@ class DataFrameController(object):
         dump(df=self.df, path=path)
 
     # -- quilter --
-    def quilt(self, config: str, *path: tuple[str], debug: bool = False) -> None:
-        quilt(dfc=self, config=config, path=path, debug=debug)
+    def quilt(self, config: str, *path: tuple[str]) -> None:
+        quilt(dfc=self, config=config, path=path)
     
     def __str__(self):
         if self.df is not None:
