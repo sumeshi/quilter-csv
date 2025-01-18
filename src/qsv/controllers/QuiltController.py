@@ -1,8 +1,6 @@
 from pathlib import Path
-import polars as pl
-
-from qsv.controllers.YamlController import YamlController
 from qsv.views.TableView import TableView
+from qsv.controllers.YamlController import YamlController
 
 class QuiltController(object):
     def __init__(self):
@@ -22,13 +20,23 @@ class QuiltController(object):
         return configs
 
     def print_configs(self, configs: list[dict]):
-        print('Loaded Rules')
+        print(f"Loaded {len(configs)} Rules")
+        digits = len(str(len(configs)))
         TableView.print(
-            headers=['title', 'description', 'version', 'author'],
-            values=[[
-                c.get('title'),
-                c.get('description'),
-                c.get('version'),
-                c.get('author')
-            ] for c in configs]
+            headers=[
+                f"{''.join([' ' for _ in range(0, digits-1)])}#",
+                'title',
+                'description',
+                'version',
+                'author'
+            ],
+            values=[
+                [
+                    str(i).zfill(digits),
+                    c.get('title'),
+                    c.get('description'),
+                    c.get('version'),
+                    c.get('author')
+                ] for i, c in enumerate(configs, 1)
+            ]
         )
