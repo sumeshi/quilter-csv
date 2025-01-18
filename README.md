@@ -312,51 +312,143 @@ $ qsv load Security.csv - dump ./Security-qsv.csv
 
 
 ### Quilt
-Quilt is a command that allows you to predefine a series of Initializer, Chainable Functions, and Finalizer processes in a YAML configuration file, and then execute them all at once.
+Quilt is a command-line tool that allows you to define a sequence of **Initializer**, **Chainable Functions**, and **Finalizer** processes in a YAML configuration file and execute them in a single pipeline.
 
-| Category | Parameter | Data Type  | Default Value | Description                                                                                                     |
-| -------- | --------- | ---------- | ------------- | --------------------------------------------------------------------------------------------------------------- |
-| Argument | config    | str        |               | The path to a YAML configuration file defining a set of initialization, transformation, and finalization steps. |
-| Argument | path      | tuple[str] |               | One or more paths to CSV files to be processed according to the predefined rules in the configuration file.     |
-| Option   | debug     | bool       | False         | Enabling this option will output each rule and its intermediate processing results to the standard output.      |
+#### Usage
 
+| Category | Parameter | Data Type  | Default Value | Description                                                                                                 |
+| -------- | --------- | ---------- | ------------- | ----------------------------------------------------------------------------------------------------------- |
+| Argument | config    | str        |               | Path to a YAML configuration file that defines initializers, chainable functions, and finalizers steps.     |
+| Argument | path      | tuple[str] |               | One or more paths to CSV files to be processed according to the predefined rules in the configuration file. |
+
+#### Command Example
+```bash
+$ qsv quilt rules/test.yaml ./Security.csv
 ```
-$ qsv quilt rules ./Security.csv
-```
 
-rules/test.yaml
+#### Configuration Example
+`rules/test.yaml`
+
 ```yaml
-title: test
-description: test filter
-version: 0.1.0
-author: John Doe <john@example.com>
-rules:
-  load: 
-  isin:
-    colname: EventId
-    values:
-      - 4624
-  head:
-    number: 5
-  select:
-    colnames:
-      - RecordNumber
-      - TimeCreated
-  changetz:
-    colname: TimeCreated
-    timezone_from: UTC
-    timezone_to: Asia/Tokyo
-    datetime_format: "%Y-%m-%d %H:%M:%S%.f"
-  showtable:
+title: 'test'
+description: 'test processes'
+version: '0.1.0'
+author: 'John Doe <john@example.com>'
+stages:
+  test_stage: # arbitrary stage name
+    type: process # operation type
+    steps:
+      load: 
+      isin:
+        colname: EventId
+        values:
+          - 4624
+      head:
+        number: 5
+      select:
+        colnames:
+          - RecordNumber
+          - TimeCreated
+      changetz:
+        colname: TimeCreated
+        tz_from: UTC
+        tz_to: Asia/Tokyo
+        dt_format: "%Y-%m-%d %H:%M:%S%.f"
+      showtable:
 ```
 
-Note: While the standard YAML specification does not permit duplicate key names, Quilt rules allow for duplicate keys under the rules section. Specifically, even when multiple renamecol entries are listed, they are internally replaced and processed as renamecol, renamecol_, renamecol__, and so on. This approach enables each entry to be recognized and handled as distinct rules.
+The above configuration file defines the following sequence of operations:
+1. Load a CSV file.
+2. Filter rows where the `EventId` column contains the value `4624`.
+3. Retrieve the first 5 rows.
+4. Extract the `RecordNumber` and `TimeCreated` columns.
+5. Convert the time zone of the `TimeCreated` column from `UTC` to `Asia/Tokyo`.
+6. Display the processing results in a table format.
 
-## Planned Features:
-- CSV cache (.pkl, duckdb, etc.)
-- Logical condition-based filtering (e.g., OR, AND) for more complex queries.
-- Grouping for operations like count
-- Support for joining data with other tables.
+#### Pipeline Operations
+| Operation Type | Description                                                | Parameters                                                                                                                                    |
+| -------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| process        | Executes a series of operations on the dataset.            | `steps`: A dict of operations (e.g., `load`, `select`, `dump`) to apply.                                                                      |
+| concat         | Concatenates multiple datasets vertically or horizontally. | `sources`: List of stages to concat. <br>`params.how`: `vertical`, `vertical_relaxed`, `horizontal`, `diagonal`, `align`, etc.                       |
+| join           | Joins multiple datasets using keys.                        | `sources`: List of stages to join.<br>`params.key`: Column(s) used for joining.<br>`params.how`: `inner`, `left`, `right`, `full`, `semi`, `anti`, `cross`.<br>`params.coalesce`: bool |
+
+#### Sample YAML (`rules/test.yaml`):
+```yaml
+title: 'test'
+description: 'test pipelines'
+version: '0.1.0'
+author: 'John Doe <john@example.com>'
+stages:
+  load_stage:
+    type: process
+    steps:
+      load:
+
+  stage_1:
+    type: process
+    source: load_stage
+    steps:
+      select:
+        colnames: 
+          - TimeCreated
+          - PayloadData1
+
+  stage_2:
+    type: process
+    source: load_stage
+    steps:
+      select:
+        colnames: 
+          - TimeCreated
+          - PayloadData2
+
+  merge_stage:
+    type: join
+    sources:
+      - stage_1
+      - stage_2
+    params:
+      how: full
+      key: TimeCreated
+      coalesce: True
+  
+  stage_3:
+    type: process
+    source: merge_stage
+    steps:
+      showtable:
+```
+
+#### Note: Step Duplication
+Quilt supports YAML configurations with duplicate keys in steps.
+
+```yaml
+stages:
+test_stage:
+  steps:
+    load:
+    renamecol: # duplicate key
+      from: old_col1
+      to: new_col1
+    renamecol: # duplicate key
+      from: old_col2
+      to: new_col2
+    renamecol: # duplicate key
+      from: old_col3
+      to: new_col3
+    show:
+```
+
+Internally, these keys are handled as:
+
+```yaml
+renamecol
+renamecol_
+renamecol__
+```
+
+This ensures that each steps is treated as a distinct operation in the pipeline.
+
 
 ## Installation
 ### from PyPI
