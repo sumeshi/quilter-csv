@@ -86,6 +86,9 @@ class DataFrameController(object):
     # -- quilter --
     def quilt(self, config: str, *path: tuple[str]) -> None:
         quilt(dfc=self, config=config, path=path)
+
+    def quilt_visualize(self, config: str) -> None:
+        quilt_visualize(config=config)
     
     def __str__(self):
         if self.df is not None:
