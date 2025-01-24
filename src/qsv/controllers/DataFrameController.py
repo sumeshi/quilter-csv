@@ -48,6 +48,10 @@ class DataFrameController(object):
         self.df = sort(df=self.df, colnames=colnames, desc=desc)
         return self
     
+    def count(self):
+        self.df = count(df=self.df)
+        return self
+    
     def uniq(self, colnames: Union[str, tuple[str], list[str]]):
         self.df = uniq(df=self.df, colnames=colnames)
         return self
