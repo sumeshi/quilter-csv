@@ -45,14 +45,16 @@ def join(
     return df_list[0].join(df_list[1], how=how, on=key, coalesce=coalesce)
 
 
-def quilt(dfc, config: str, path: tuple[str]) -> None:
+def quilt(dfc, config: str, path: tuple[str], debug: bool) -> None:
     """[quilter] Loads the specified quilt batch files."""
     LogController.debug(f"config: {config}")
     LogController.debug(f"{len(path)} files are loaded. [{', '.join(path)}]")
 
     q = QuiltController()
     configs = q.load_configs(config)
-    q.print_configs(configs)
+
+    if debug:
+        q.print_configs(configs)
 
     # per config file
     for config in configs:

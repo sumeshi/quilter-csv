@@ -84,8 +84,8 @@ class DataFrameController(object):
         dump(df=self.df, path=path)
 
     # -- quilter --
-    def quilt(self, config: str, *path: tuple[str]) -> None:
-        quilt(dfc=self, config=config, path=path)
+    def quilt(self, config: str, *path: tuple[str], debug: bool = False) -> None:
+        quilt(dfc=self, config=config, path=path, debug=debug)
 
     def quilt_visualize(self, config: str) -> None:
         quilt_visualize(config=config)
