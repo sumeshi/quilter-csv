@@ -11,5 +11,5 @@ def sed(df: pl.LazyFrame, colname: str, pattern: str, replacement: str, ignoreca
     LogController.debug(f"sed condition: {pattern} on {colname}")
     pattern = pattern if type(pattern) is str else str(pattern)
     return df.with_columns(
-        pl.col(colname).cast(pl.String).str.replace(f"(?i){pattern}", replacement) if ignorecase else pl.col(colname).cast(pl.String).str.replace(pattern, replacement)
+        pl.col(colname).cast(pl.String).str.replace_all(f"(?i){pattern}", replacement) if ignorecase else pl.col(colname).cast(pl.String).str.replace_all(pattern, replacement)
     )
