@@ -48,6 +48,10 @@ class DataFrameController(object):
         self.df = sort(df=self.df, colnames=colnames, desc=desc)
         return self
     
+    def count(self):
+        self.df = count(df=self.df)
+        return self
+    
     def uniq(self, colnames: Union[str, tuple[str], list[str]]):
         self.df = uniq(df=self.df, colnames=colnames)
         return self
@@ -84,8 +88,11 @@ class DataFrameController(object):
         dump(df=self.df, path=path)
 
     # -- quilter --
-    def quilt(self, config: str, *path: tuple[str]) -> None:
-        quilt(dfc=self, config=config, path=path)
+    def quilt(self, config: str, *path: tuple[str], debug: bool = False) -> None:
+        quilt(dfc=self, config=config, path=path, debug=debug)
+
+    def quilt_visualize(self, config: str) -> None:
+        quilt_visualize(config=config)
     
     def __str__(self):
         if self.df is not None:

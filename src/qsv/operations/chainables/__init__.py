@@ -6,6 +6,7 @@ from qsv.operations.chainables.grep import grep
 from qsv.operations.chainables.head import head
 from qsv.operations.chainables.tail import tail
 from qsv.operations.chainables.sort import sort
+from qsv.operations.chainables.count import count
 from qsv.operations.chainables.uniq import uniq
 from qsv.operations.chainables.changetz import changetz
 from qsv.operations.chainables.renamecol import renamecol
@@ -19,6 +20,7 @@ __all__ = [
     'head',
     'tail',
     'sort',
+    'count',
     'uniq',
     'changetz',
     'renamecol',

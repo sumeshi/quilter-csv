@@ -175,6 +175,13 @@ Sorts all rows by the specified column values.
 $ qsv load ./Security.csv - sort 'Date and Time'
 ```
 
+#### sort
+Counts duplicate rows, grouping by all columns.
+
+```
+$ qsv load ./Security.csv - count
+```
+
 #### uniq
 Remove duplicate rows based on the specified column names.
 
