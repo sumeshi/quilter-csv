@@ -1,4 +1,5 @@
 import re
+import sys
 from typing import Union, Optional, Literal
 from qsv.controllers.LogController import LogController
 from qsv.controllers.QuiltController import QuiltController
@@ -62,25 +63,32 @@ def quilt(dfc, config: str, path: tuple[str]) -> None:
             stage_type = stage_values.get('type')
 
             if stage_type == "process":
-                if 'source' in stage_values:
-                    # pipeline
+                try:
                     df_dict[stage_key] = process(
                         dfc=dfc,
                         steps=stage_values.get('steps').items(),
                         path=path,
-                        source=df_dict[stage_values.get('source')],
+                        source=df_dict.get(stage_values.get('source')),
                     )
-                else:
-                    # load from file
-                    df_dict[stage_key] = process(
-                        dfc=dfc,
-                        steps=stage_values.get('steps').items(),
-                        path=path
-                    )
+                except AttributeError as e:
+                    print(f"Invalid Attribute on {stage_key}")
+                    print(e)
+                    sys.exit(1)
+
+                except TypeError as e:
+                    print(f"Invalid Argument on {stage_key}")
+                    print(e)
+                    sys.exit(1)
 
             elif stage_type == "concat":
                 sources = stage_values.get('sources')
                 how = stage_values.get('params', dict()).get('how', 'vertical')
+
+                for s in sources:
+                    if s not in df_dict.keys():
+                        print(f"DataSource {s} does not exist in stage {stage_key}")
+                        sys.exit(1)
+
                 df_dict[stage_key] = concat(
                     df_list=[df_dict.get(source) for source in sources],
                     how=how
@@ -91,6 +99,11 @@ def quilt(dfc, config: str, path: tuple[str]) -> None:
                 how = stage_values.get('params', dict()).get('how', 'full')
                 key = stage_values.get('params', dict()).get('key')
                 coalesce = stage_values.get('params', dict()).get('coalesce', True)
+
+                for s in sources:
+                    if s not in df_dict.keys():
+                        print(f"DataSource {s} does not exist in stage {stage_key}")
+                        sys.exit(1)
 
                 df_dict[stage_key] = join(
                     df_list=[df_dict.get(source) for source in sources],
